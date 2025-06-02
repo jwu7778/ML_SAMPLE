@@ -33,7 +33,7 @@ fi
 conda run -n "$env_name" pip install jupyter ipykernel
 
 # Install PaddlePaddle
-conda run -n "$env_name" pip install paddlepaddle
+conda run -n "$env_name" pip install paddlepaddle==3.0.0rc0
 
 # Force downgrade numpy to compatible version
 conda run -n "$env_name" pip install "numpy<2.0.0"
@@ -57,9 +57,9 @@ cd PaddleOCR || exit 1
 echo "Fetching all branches..."
 git fetch --all
 
-# Checkout to release/2.10 branch
-echo "Checking out release/2.6 branch..."
-git checkout release/2.10 || { echo -e "\033[0;31m[Error]\033[0m Git checkout failed!"; exit 1; }
+# Checkout to release/2.9 branch
+echo "Checking out release/2.9 branch..."
+git checkout release/2.9 || { echo -e "\033[0;31m[Error]\033[0m Git checkout failed!"; exit 1; }
 
 # Install dependencies
 echo "Installing dependencies inside '$env_name'..."
@@ -79,6 +79,7 @@ rm -rf .git
 # Return to the root directory
 cd ..
 
+
 conda run -n "$env_name" pip install python-docx
 
 conda run -n "$env_name" pip install paddle2onnx
@@ -92,6 +93,19 @@ conda run -n "$env_name" pip install paddleclas
 conda run -n "$env_name" pip install premailer
 
 conda run -n "$env_name" pip install openpyxl
+
+conda run -n "$env_name" pip install transformers
+
+if lspci | grep -i 'nvidia' > /dev/null; then
+    echo "NVIDIA"
+    conda run -n "$env_name" pip install torch==2.7.0+cu128 torchvision==0.22.0+cu128 torchaudio==2.7.0+cu128 --index-url https://download.pytorch.org/whl/cu128
+elif lspci | grep -i 'amd\|ati' > /dev/null; then
+    echo "AMD"
+    conda run -n "$env_name" pip install torch==2.7.0+rocm6.3 torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.3
+else
+    echo "Other or Unknown"
+fi
+
 
 # Download and extract models into a models/ directory
 mkdir -p models
@@ -123,6 +137,10 @@ eval "$(conda shell.bash hook)"
 conda activate "$env_name"
 python -m ipykernel install --user --name="$env_name" --display-name="Python ($env_name)"
 
+git clone https://huggingface.co/microsoft/table-transformer-structure-recognition.git
+
+
+~/.conda/envs/$env_name/lib/python3.10/
 # Done
 end_time=$(date +%s)
 elapsed=$((end_time - start_time))

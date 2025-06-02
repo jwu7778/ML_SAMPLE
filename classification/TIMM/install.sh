@@ -23,14 +23,15 @@ gpu_model=$(nvidia-smi --query-gpu=name --format=csv,noheader | head -n1)
 # Check if PyTorch is already installed
 pytorch_installed=$(conda run -n "$env_name" pip show torch)
 
-if [[ "$gpu_model" == *"5090"* && ( -z "$pytorch_installed" || $(echo "$pytorch_installed" | grep -i "torch" | grep -v "cu128") ) ]]; then
-  echo "Detected GPU: $gpu_model. Installing PyTorch nightly build with CUDA 12.8 support..."
-  conda run -n "$env_name" pip install --pre torch==2.8.0.dev20250319+cu128 torchvision==0.22.0.dev20250319+cu128 torchaudio==2.6.0.dev20250319+cu128 --index-url https://download.pytorch.org/whl/nightly/cu128
+if lspci | grep -i 'nvidia' > /dev/null; then
+    echo "NVIDIA"
+    conda run -n "$env_name" pip install torch==2.7.0+cu128 torchvision==0.22.0+cu128 torchaudio==2.7.0+cu128 --index-url https://download.pytorch.org/whl/cu128
+elif lspci | grep -i 'amd\|ati' > /dev/null; then
+    echo "AMD"
+    conda run -n "$env_name" pip install torch==2.7.0+rocm6.3 torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.3
 else
-  echo "Detected GPU: $gpu_model. Installing default PyTorch (or no installation needed)."
-  conda run -n "$env_name" pip install torch torchvision torchaudio
+    echo "Other or Unknown"
 fi
-
 # Step 3: Install Jupyter and register the kernel
 conda run -n "$env_name" pip install jupyter ipykernel
 conda run -n "$env_name" python -m ipykernel install --user --name="$env_name" --display-name="Python ($env_name)"

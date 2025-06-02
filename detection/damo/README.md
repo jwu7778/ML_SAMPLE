@@ -29,8 +29,10 @@ It is specifically configured to work with the [GC10-Det](https://datasetninja.c
   3. Place the folder named `dc` under `DAMO-YOLO/datasets/`.
   4. Rename it to: `GC10-Det`
 
-> ⚠️ Current notebooks use **only a partial subset** of GC10-Det for demo purposes.  
-> For complete evaluation or model improvement, you are encouraged to download and use the **full dataset** manually.
+The dataset setup steps below have already been completed for this tutorial.
+You may refer to them if you plan to switch to a different dataset in the future.
+
+
 
 ---
 
@@ -40,16 +42,16 @@ It is specifically configured to work with the [GC10-Det](https://datasetninja.c
 - **Structure:** Images organized by class folders with bounding box annotations
 - **Data Type:** RGB images with annotated bounding boxes for defects
 - **Classes:**
-  - Missing Hole
-  - Crazing
-  - Crack
-  - Fray
-  - Recoil
-  - Break
-  - Uneven
-  - Contamination
-  - X-mark
-  - Other
+  - crease
+  - crescent_gap
+  - inclusion
+  - oil_spot
+  - punching_hole
+  - rolled_pit
+  - silk_spot
+  - waist folding
+  - water_spot
+  - welding_line
 
 This dataset is widely used in quality control and predictive maintenance in smart manufacturing.
 

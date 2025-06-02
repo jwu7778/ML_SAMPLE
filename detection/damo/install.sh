@@ -30,17 +30,15 @@ conda run -n "$env_name" python -m ipykernel install --user --name="$env_name" -
 conda run -n "$env_name" pip install --upgrade pip
 
 # Step 4: Install PyTorch Nightly (CUDA 12.8)
-echo "🔥 Installing PyTorch..."
 if lspci | grep -i 'nvidia' > /dev/null; then
     echo "NVIDIA"
-    conda run -n "$env_name" pip install --pre torch==2.8.0.dev20250319+cu128 torchvision==0.22.0.dev20250319+cu128 torchaudio==2.6.0.dev20250319+cu128 --index-url https://download.pytorch.org/whl/nightly/cu128
+    conda run -n "$env_name" pip install torch==2.7.0+cu128 torchvision==0.22.0+cu128 torchaudio==2.7.0+cu128 --index-url https://download.pytorch.org/whl/cu128
 elif lspci | grep -i 'amd\|ati' > /dev/null; then
     echo "AMD"
     conda run -n "$env_name" pip install torch==2.7.0+rocm6.3 torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.3
 else
     echo "Other or Unknown"
 fi
-
 
 # Step 5: Clone DAMO-YOLO
 echo "📥 Cloning DAMO-YOLO repository..."
@@ -86,8 +84,6 @@ fi
 rm -rf tmp_gc10
 
 
-cp -f paths_catalog.py DAMO-YOLO/damo/config/paths_catalog.py
-cp damoyolo_tinynasL18_Ns-GC10.py DAMO-YOLO/configs/
 cp -fv ./cocoeval.py ~/.conda/envs/$env_name/lib/python3.10/site-packages/pycocotools/cocoeval.py
 
 

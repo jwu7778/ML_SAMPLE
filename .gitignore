@@ -1,5 +1,12 @@
 **/.ipynb_checkpoints/
 **/mmcv/
-**/Chess.zip
-**/gc10.zip
+**/mmdeploy/
+**/mmdeploy_model/
+**/mmengine/
+**/mmpretrain/
+**/image/
+**/images/
+**/ISIC/
+**/OCT/
+**/*.zip
 **/*.pkl

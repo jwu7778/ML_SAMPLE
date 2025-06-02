@@ -49,8 +49,15 @@ fi
 conda run -n "$env_name" pip install jupyter ipykernel
 conda run -n "$env_name" python -m ipykernel install --user --name="$env_name" --display-name="Python ($env_name)"
 
-# Install PyTorch with CUDA 12.8
-conda run -n "$env_name" pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu128
+if lspci | grep -i 'nvidia' > /dev/null; then
+    echo "NVIDIA"
+    conda run -n "$env_name" pip install torch==2.7.0+cu128 torchvision==0.22.0+cu128 torchaudio==2.7.0+cu128 --index-url https://download.pytorch.org/whl/cu128
+elif lspci | grep -i 'amd\|ati' > /dev/null; then
+    echo "AMD"
+    conda run -n "$env_name" pip install torch==2.7.0+rocm6.3 torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.3
+else
+    echo "Other or Unknown"
+fi
 
 # Clone Detectron2 if not already cloned
 if [ ! -d "detectron2" ]; then

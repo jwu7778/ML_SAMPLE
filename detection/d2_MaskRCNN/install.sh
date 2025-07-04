@@ -49,16 +49,51 @@ fi
 conda run -n "$env_name" pip install jupyter ipykernel
 conda run -n "$env_name" python -m ipykernel install --user --name="$env_name" --display-name="Python ($env_name)"
 
-# Install PyTorch with CUDA 12.8
-if lspci | grep -i 'nvidia' > /dev/null; then
-    echo "NVIDIA"
+# Check if the environment is WSL
+if grep -qi microsoft /proc/version || uname -r | grep -qi microsoft; then
+    echo "Detected WSL environment"
+
+    # Use PowerShell to detect GPU vendor from Windows
+    wsl_path=$(command -v wsl.exe)
+    if [ -z "$wsl_path" ]; then
+        echo "wsl.exe not found. Defaulting to CPU-only PyTorch install."
+        gpu_vendor="UNKNOWN"
+    else
+        gpu_name=$("$wsl_path" powershell.exe -NoLogo -NoProfile -Command \
+          "Get-WmiObject Win32_VideoController | Select-Object -ExpandProperty Name" |
+          tr -d '\r')
+        
+        echo "Windows GPU detected from PowerShell: $gpu_name"
+
+        if [[ $gpu_name == *NVIDIA* ]]; then
+            gpu_vendor="NVIDIA"
+        elif [[ $gpu_name == *AMD* ]]; then
+            gpu_vendor="AMD"
+        else
+            gpu_vendor="UNKNOWN"
+        fi
+    fi
+else
+    # Not WSL — detect GPU via Linux tools
+    if command -v nvidia-smi &> /dev/null; then
+        gpu_vendor="NVIDIA"
+    elif command -v rocminfo &> /dev/null; then
+        gpu_vendor="AMD"
+    else
+        gpu_vendor="UNKNOWN"
+    fi
+fi
+
+# Install PyTorch based on GPU vendor
+echo "Installing PyTorch for GPU vendor: $gpu_vendor"
+if [[ $gpu_vendor == "NVIDIA" ]]; then
     conda run -n "$env_name" pip install torch==2.7.0+cu128 torchvision==0.22.0+cu128 torchaudio==2.7.0+cu128 --index-url https://download.pytorch.org/whl/cu128
-elif lspci | grep -i 'amd\|ati' > /dev/null; then
-    echo "AMD"
+elif [[ $gpu_vendor == "AMD" ]]; then
     conda run -n "$env_name" pip install torch==2.7.0+rocm6.3 torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.3
 else
-    echo "Other or Unknown"
+    conda run -n "$env_name" pip install torch torchvision torchaudio
 fi
+
 
 
 # Clone Detectron2 if not already cloned
@@ -71,7 +106,9 @@ fi
 
 # Install Detectron2 and related dependencies
 conda run -n "$env_name" pip install --no-build-isolation "detectron2 @ file://$SCRIPT_DIR/detectron2"
-conda run -n "$env_name" pip install opencv-python fvcore cloudpickle seaborn
+conda run -n "$env_name" pip install opencv-python fvcore cloudpickle
+conda run -n "$env_name" pip install scikit-learn==1.6.1
+conda run -n "$env_name" pip install seaborn==0.13.2
 
 # Install onnx to export your model
 conda run -n "$env_name" pip install onnx onnxruntime-gpu

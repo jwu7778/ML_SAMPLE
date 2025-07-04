@@ -17,21 +17,53 @@ fi
 conda create --name "$env_name" python=3.10 -y
 echo "Environment '$env_name' created."
 
-# Step 2.5: Check if PyTorch is installed, and install nightly build for RTX 5090 if needed
-gpu_model=$(nvidia-smi --query-gpu=name --format=csv,noheader | head -n1)
+# Check if the environment is WSL
+if grep -qi microsoft /proc/version || uname -r | grep -qi microsoft; then
+    echo "Detected WSL environment"
 
-# Check if PyTorch is already installed
-pytorch_installed=$(conda run -n "$env_name" pip show torch)
+    # Use PowerShell to detect GPU vendor from Windows
+    wsl_path=$(command -v wsl.exe)
+    if [ -z "$wsl_path" ]; then
+        echo "wsl.exe not found. Defaulting to CPU-only PyTorch install."
+        gpu_vendor="UNKNOWN"
+    else
+        gpu_name=$("$wsl_path" powershell.exe -NoLogo -NoProfile -Command \
+          "Get-WmiObject Win32_VideoController | Select-Object -ExpandProperty Name" |
+          tr -d '\r')
+        
+        echo "Windows GPU detected from PowerShell: $gpu_name"
 
-if lspci | grep -i 'nvidia' > /dev/null; then
-    echo "NVIDIA"
+        if [[ $gpu_name == *NVIDIA* ]]; then
+            gpu_vendor="NVIDIA"
+        elif [[ $gpu_name == *AMD* ]]; then
+            gpu_vendor="AMD"
+        else
+            gpu_vendor="UNKNOWN"
+        fi
+    fi
+else
+    # Not WSL — detect GPU via Linux tools
+    if command -v nvidia-smi &> /dev/null; then
+        gpu_vendor="NVIDIA"
+    elif command -v rocminfo &> /dev/null; then
+        gpu_vendor="AMD"
+    else
+        gpu_vendor="UNKNOWN"
+    fi
+fi
+
+# Install PyTorch based on GPU vendor
+echo "Installing PyTorch for GPU vendor: $gpu_vendor"
+if [[ $gpu_vendor == "NVIDIA" ]]; then
     conda run -n "$env_name" pip install torch==2.7.0+cu128 torchvision==0.22.0+cu128 torchaudio==2.7.0+cu128 --index-url https://download.pytorch.org/whl/cu128
-elif lspci | grep -i 'amd\|ati' > /dev/null; then
-    echo "AMD"
+elif [[ $gpu_vendor == "AMD" ]]; then
     conda run -n "$env_name" pip install torch==2.7.0+rocm6.3 torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.3
 else
-    echo "Other or Unknown"
+    conda run -n "$env_name" pip install torch torchvision torchaudio
 fi
+
+
+
 # Step 3: Install Jupyter and register the kernel
 conda run -n "$env_name" pip install jupyter ipykernel
 conda run -n "$env_name" python -m ipykernel install --user --name="$env_name" --display-name="Python ($env_name)"
@@ -58,7 +90,8 @@ cd ..
 conda run -n "$env_name" pip install huggingface_hub==0.29.3
 conda run -n "$env_name" pip install matplotlib==3.9.4
 conda run -n "$env_name" pip install pandas
-conda run -n "$env_name" pip install scikit-learn
+conda run -n "$env_name" pip install scikit-learn==1.6.1
+conda run -n "$env_name" pip install seaborn==0.13.2
 conda run -n "$env_name" pip install onnx
 conda run -n "$env_name" pip install onnxruntime-gpu
 conda run -n "$env_name" pip install opencv-python

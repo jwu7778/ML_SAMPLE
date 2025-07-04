@@ -49,15 +49,51 @@ fi
 conda run -n "$env_name" pip install jupyter ipykernel
 conda run -n "$env_name" python -m ipykernel install --user --name="$env_name" --display-name="Python ($env_name)"
 
-if lspci | grep -i 'nvidia' > /dev/null; then
-    echo "NVIDIA"
+# Check if the environment is WSL
+if grep -qi microsoft /proc/version || uname -r | grep -qi microsoft; then
+    echo "Detected WSL environment"
+
+    # Use PowerShell to detect GPU vendor from Windows
+    wsl_path=$(command -v wsl.exe)
+    if [ -z "$wsl_path" ]; then
+        echo "wsl.exe not found. Defaulting to CPU-only PyTorch install."
+        gpu_vendor="UNKNOWN"
+    else
+        gpu_name=$("$wsl_path" powershell.exe -NoLogo -NoProfile -Command \
+          "Get-WmiObject Win32_VideoController | Select-Object -ExpandProperty Name" |
+          tr -d '\r')
+        
+        echo "Windows GPU detected from PowerShell: $gpu_name"
+
+        if [[ $gpu_name == *NVIDIA* ]]; then
+            gpu_vendor="NVIDIA"
+        elif [[ $gpu_name == *AMD* ]]; then
+            gpu_vendor="AMD"
+        else
+            gpu_vendor="UNKNOWN"
+        fi
+    fi
+else
+    # Not WSL — detect GPU via Linux tools
+    if command -v nvidia-smi &> /dev/null; then
+        gpu_vendor="NVIDIA"
+    elif command -v rocminfo &> /dev/null; then
+        gpu_vendor="AMD"
+    else
+        gpu_vendor="UNKNOWN"
+    fi
+fi
+
+# Install PyTorch based on GPU vendor
+echo "Installing PyTorch for GPU vendor: $gpu_vendor"
+if [[ $gpu_vendor == "NVIDIA" ]]; then
     conda run -n "$env_name" pip install torch==2.7.0+cu128 torchvision==0.22.0+cu128 torchaudio==2.7.0+cu128 --index-url https://download.pytorch.org/whl/cu128
-elif lspci | grep -i 'amd\|ati' > /dev/null; then
-    echo "AMD"
+elif [[ $gpu_vendor == "AMD" ]]; then
     conda run -n "$env_name" pip install torch==2.7.0+rocm6.3 torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.3
 else
-    echo "Other or Unknown"
+    conda run -n "$env_name" pip install torch torchvision torchaudio
 fi
+
 
 # Clone Detectron2 if not already cloned
 if [ ! -d "detectron2" ]; then
@@ -75,15 +111,9 @@ conda run -n "$env_name" pip install opencv-python fvcore cloudpickle
 conda run -n "$env_name" pip install onnx onnxruntime-gpu
 
 
-echo "Installing FiftyOne..."
-conda run -n "$env_name" pip install fiftyone
-
-# Install onnx to export your model
-conda run -n "$env_name" pip install onnx onnxruntime-gpu
-
 # Revise error code in demo.py and postprocessing.py
 cp -fv ./demo.py detectron2/demo/demo.py
-cp -fv ./postprocessing.py ~/.conda/envs/$env_name/lib/python3.10/site-packages/detectron2/modeling/postprocessing.py
+cp -fv ./mask_ops.py detectron2/detectron2/layers/mask_ops.py
 
 # Done
 end_time=$(date +%s)

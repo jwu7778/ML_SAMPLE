@@ -27,23 +27,54 @@ echo "Jupyter kernel 'Python ($env_name)' registered."
 echo "📦 Upgrading pip, setuptools, ninja..."
 conda run -n "$env_name" pip install -U pip setuptools ninja 
 
-# Step 4: Check if PyTorch is installed, and install nightly build for RTX 5090 if needed
-gpu_model=$(nvidia-smi --query-gpu=name --format=csv,noheader | head -n1)
 
-# Check if PyTorch is already installed
+# Check if the environment is WSL
+if grep -qi microsoft /proc/version || uname -r | grep -qi microsoft; then
+    echo "Detected WSL environment"
 
+    # Use PowerShell to detect GPU vendor from Windows
+    wsl_path=$(command -v wsl.exe)
+    if [ -z "$wsl_path" ]; then
+        echo "wsl.exe not found. Defaulting to CPU-only PyTorch install."
+        gpu_vendor="UNKNOWN"
+    else
+        gpu_name=$("$wsl_path" powershell.exe -NoLogo -NoProfile -Command \
+          "Get-WmiObject Win32_VideoController | Select-Object -ExpandProperty Name" |
+          tr -d '\r')
+        
+        echo "Windows GPU detected from PowerShell: $gpu_name"
 
-if lspci | grep -i 'nvidia' > /dev/null; then
-    echo "NVIDIA"
+        if [[ $gpu_name == *NVIDIA* ]]; then
+            gpu_vendor="NVIDIA"
+        elif [[ $gpu_name == *AMD* ]]; then
+            gpu_vendor="AMD"
+        else
+            gpu_vendor="UNKNOWN"
+        fi
+    fi
+else
+    # Not WSL — detect GPU via Linux tools
+    if command -v nvidia-smi &> /dev/null; then
+        gpu_vendor="NVIDIA"
+    elif command -v rocminfo &> /dev/null; then
+        gpu_vendor="AMD"
+    else
+        gpu_vendor="UNKNOWN"
+    fi
+fi
+
+# Install PyTorch based on GPU vendor
+echo "Installing PyTorch for GPU vendor: $gpu_vendor"
+if [[ $gpu_vendor == "NVIDIA" ]]; then
     conda run -n "$env_name" pip install torch==2.7.0+cu128 torchvision==0.22.0+cu128 torchaudio==2.7.0+cu128 --index-url https://download.pytorch.org/whl/cu128
-elif lspci | grep -i 'amd\|ati' > /dev/null; then
-    echo "AMD"
+elif [[ $gpu_vendor == "AMD" ]]; then
     conda run -n "$env_name" pip install torch==2.7.0+rocm6.3 torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.3
 else
-    echo "Other or Unknown"
+    conda run -n "$env_name" pip install torch torchvision torchaudio
 fi
 
 
+conda run -n "$env_name" pip install -U openmim
 
 git clone https://github.com/open-mmlab/mmengine.git
 cd mmengine
@@ -63,15 +94,15 @@ cd ..
 # Step 7: Install additional packages
 echo "📦 Installing additional Python packages..."
 conda run -n "$env_name" pip install regex==2024.11.6
-conda run -n "$env_name" pip install -U openmim importlib_metadata huggingface_hub future tensorboard ftfy
+conda run -n "$env_name" pip install -U importlib_metadata huggingface_hub future tensorboard ftfy
 
 
 # Clone the mmsegmentation repository
 git clone https://github.com/open-mmlab/mmsegmentation.git
 cd mmsegmentation
 git checkout v1.2.2
-# Modify mmcv_maximum_version in mmdet/__init__.py (Ubuntu version)
-sed -i "s/^mmcv_maximum_version *= *.*/mmcv_maximum_version = '2.2.1'/" mmseg/__init__.py
+# Modify mmcv_maximum_version in mmseg/__init__.py (Ubuntu version)
+sed -i "s/^MMCV_MAX *= *.*/MMCV_MAX = '2.2.1'/" mmseg/__init__.py
 conda run -n "$env_name"  pip install -e .
 cd ..
 
@@ -88,6 +119,18 @@ cd ..
 
 cp checkpoint.py mmengine/mmengine/runner/checkpoint.py
 
+git clone -b main https://github.com/open-mmlab/mmdeploy.git
+cd mmdeploy
+git checkout v1.3.1
+conda run -n "$env_name"  pip install -e .
+cd ..
 
 
+conda run -n "$env_name" pip install onnxruntime-gpu
+
+wget https://github.com/matterport/Mask_RCNN/releases/download/v2.1/balloon_dataset.zip
+unzip balloon_dataset.zip -d mmdetection/data
+
+conda run -n "$env_name" pip install pycocotools==2.0.8
+ 
 echo "✅ Environment setup complete: '$env_name'"

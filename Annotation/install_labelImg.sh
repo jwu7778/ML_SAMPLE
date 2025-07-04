@@ -12,7 +12,7 @@ if [[ "$CONDA_DEFAULT_ENV" != "" && "$CONDA_DEFAULT_ENV" != "base" ]]; then
 fi
 
 # Create labelImg environment
-conda create -n labelImg python=3.10 -y
+conda create -n labelImg python=3.8 -y
 if [ $? -ne 0 ]; then
     echo "[Error] Failed to create conda environment."
     exit 1

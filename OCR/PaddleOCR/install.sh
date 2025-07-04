@@ -94,42 +94,56 @@ conda run -n "$env_name" pip install premailer
 
 conda run -n "$env_name" pip install openpyxl
 
+conda run -n "$env_name" pip install timm==1.0.15
+
 conda run -n "$env_name" pip install transformers
 
-if lspci | grep -i 'nvidia' > /dev/null; then
-    echo "NVIDIA"
+# Check if the environment is WSL
+if grep -qi microsoft /proc/version || uname -r | grep -qi microsoft; then
+    echo "Detected WSL environment"
+
+    # Use PowerShell to detect GPU vendor from Windows
+    wsl_path=$(command -v wsl.exe)
+    if [ -z "$wsl_path" ]; then
+        echo "wsl.exe not found. Defaulting to CPU-only PyTorch install."
+        gpu_vendor="UNKNOWN"
+    else
+        gpu_name=$("$wsl_path" powershell.exe -NoLogo -NoProfile -Command \
+          "Get-WmiObject Win32_VideoController | Select-Object -ExpandProperty Name" |
+          tr -d '\r')
+        
+        echo "Windows GPU detected from PowerShell: $gpu_name"
+
+        if [[ $gpu_name == *NVIDIA* ]]; then
+            gpu_vendor="NVIDIA"
+        elif [[ $gpu_name == *AMD* ]]; then
+            gpu_vendor="AMD"
+        else
+            gpu_vendor="UNKNOWN"
+        fi
+    fi
+else
+    # Not WSL — detect GPU via Linux tools
+    if command -v nvidia-smi &> /dev/null; then
+        gpu_vendor="NVIDIA"
+    elif command -v rocminfo &> /dev/null; then
+        gpu_vendor="AMD"
+    else
+        gpu_vendor="UNKNOWN"
+    fi
+fi
+
+# Install PyTorch based on GPU vendor
+echo "Installing PyTorch for GPU vendor: $gpu_vendor"
+if [[ $gpu_vendor == "NVIDIA" ]]; then
     conda run -n "$env_name" pip install torch==2.7.0+cu128 torchvision==0.22.0+cu128 torchaudio==2.7.0+cu128 --index-url https://download.pytorch.org/whl/cu128
-elif lspci | grep -i 'amd\|ati' > /dev/null; then
-    echo "AMD"
+elif [[ $gpu_vendor == "AMD" ]]; then
     conda run -n "$env_name" pip install torch==2.7.0+rocm6.3 torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.3
 else
-    echo "Other or Unknown"
+    conda run -n "$env_name" pip install torch torchvision torchaudio
 fi
 
 
-# Download and extract models into a models/ directory
-mkdir -p models
-cd models
-
-# Detection model
-wget -nc https://paddleocr.bj.bcebos.com/PP-OCRv4/chinese/ch_PP-OCRv4_det_infer.tar
-if [ -f "ch_PP-OCRv4_det_infer.tar" ]; then
-  tar -xf ch_PP-OCRv4_det_infer.tar
-fi
-
-# Recognition model
-wget -nc https://paddleocr.bj.bcebos.com/PP-OCRv4/chinese/ch_PP-OCRv4_rec_infer.tar
-if [ -f "ch_PP-OCRv4_rec_infer.tar" ]; then
-  tar -xf ch_PP-OCRv4_rec_infer.tar
-fi
-
-# Classification model
-wget -nc https://paddleocr.bj.bcebos.com/dygraph_v2.0/ch/ch_ppocr_mobile_v2.0_cls_infer.tar
-if [ -f "ch_ppocr_mobile_v2.0_cls_infer.tar" ]; then
-  tar -xf ch_ppocr_mobile_v2.0_cls_infer.tar
-fi
-
-cd ..
 
 # Register Jupyter kernel
 echo "Registering Jupyter kernel for '$env_name'..."
@@ -140,7 +154,6 @@ python -m ipykernel install --user --name="$env_name" --display-name="Python ($e
 git clone https://huggingface.co/microsoft/table-transformer-structure-recognition.git
 
 
-~/.conda/envs/$env_name/lib/python3.10/
 # Done
 end_time=$(date +%s)
 elapsed=$((end_time - start_time))

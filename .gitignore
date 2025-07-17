@@ -1,0 +1,15 @@
+**/.ipynb_checkpoints/
+**/mmcv/
+**/mmdeploy/
+**/mmdeploy_model/
+**/mmengine/
+**/mmpretrain/
+**/image/
+**/images/
+**/ISIC/
+**/OCT/
+**/*.zip
+**/*.pkl
+**/*.json
+**/*.pth
+**/*.mp4

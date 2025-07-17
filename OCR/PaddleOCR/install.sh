@@ -136,7 +136,7 @@ fi
 # Install PyTorch based on GPU vendor
 echo "Installing PyTorch for GPU vendor: $gpu_vendor"
 if [[ $gpu_vendor == "NVIDIA" ]]; then
-    conda run -n "$env_name" pip install torch==2.7.0+cu128 torchvision==0.22.0+cu128 torchaudio==2.7.0+cu128 --index-url https://download.pytorch.org/whl/cu128
+    conda run -n "$env_name" pip install torch==2.7.0+cu128 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
 elif [[ $gpu_vendor == "AMD" ]]; then
     conda run -n "$env_name" pip install torch==2.7.0+rocm6.3 torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.3
 else
@@ -153,12 +153,4 @@ python -m ipykernel install --user --name="$env_name" --display-name="Python ($e
 
 git clone https://huggingface.co/microsoft/table-transformer-structure-recognition.git
 
-
-# Done
-end_time=$(date +%s)
-elapsed=$((end_time - start_time))
-minutes=$((elapsed / 60))
-seconds=$((elapsed % 60))
-echo "\033[0;32m[Success]\033[0m PaddleOCR environment '$env_name' installed and Jupyter kernel registered successfully."
-echo "\033[1;34m[Info]\033[0m Total installation time: ${minutes} min ${seconds} sec"
-
+echo "Environment setup complete: '$env_name'"

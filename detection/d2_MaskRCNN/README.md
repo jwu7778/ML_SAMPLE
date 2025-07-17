@@ -8,56 +8,49 @@ Mask R-CNN not only detects object bounding boxes but also generates a high-qual
 
 ## 📘 Available Notebooks
 
-1. **`Detectron2_Train_Instance_Segmentation_with_Augmentation_(Balloon).ipynb`**  
+1. **`Detectron2_Tutorial_Instance_Segmentation.ipynb`**
+   - Introduction of Detectron2 package. Demonstration of workflow with a simple dataset. You can fit your dataset and choose your model by revising this script.  
    - Task: Instance segmentation on a custom dataset (balloons)  
    - Dataset: From Matterport’s balloon segmentation demo  
    - Workflow:
-     - COCO-style annotation loading  
+     - LabelMe-style annotation loading  
      - Dataset registration for Detectron2  
      - Data augmentation configuration  
      - Mask R-CNN model training and visualization
 
-2. **`Inference PreTrained Instance Segmentation.ipynb`**  
+3. **`Inference PreTrained Instance Segmentation.ipynb`**  
    - Task: Inference using pretrained Mask R-CNN models  
    - Demo: Inference on arbitrary images using built-in weights  
    - Output: Instance masks, class labels, and confidence scores overlayed on images
 
 ---
 
-## 🎨 Dataset Setup
-
-### 🎈 Balloon Dataset
-
+## 🎈 Dataset Description: Balloon
 - **Source:** [Matterport Balloon Dataset](https://github.com/matterport/Mask_RCNN/tree/master/samples/balloon) provided by Waleed Abdulla
-- **Format:** COCO JSON  
+- **Target:** Simple but effective dataset to demonstrate instance segmentation tasks with non-rectangular objects. Each image contains one or more balloons with polygon-style instance annotations.
+- **Format:**  LabelMe JSON  
 - **Structure:** 
   ```
-  ├── train/
-  │   ├── 123.jpg
-  │   ├── ...
-  │   └── via_region_data.json
-  └── val/
-      ├── 456.jpg
-      ├── ...
-      └── via_region_data.json
+    ├── train
+    │   ├── image1
+    │   ├── image1.json
+    │   ├── image2
+    │   └── image2.json
+    └── val
+        ├── image1
+        ├── image1.json
+        ├── image2
+        └── image2.json
   ```
-- **Classes:** Single class - `balloon`  
-- **Purpose:** Simple but effective dataset to demonstrate instance segmentation tasks with non-rectangular objects.
 
 ---
 
 ## 📌 Notes & Tips
 
 - Use `DefaultTrainer` or build a custom trainer for flexible training logic
-- Masks are automatically matched with class labels using COCO annotation format
 - Use `Visualizer(draw_instance_predictions)` to overlay masks with transparency
 - Resize images or limit batch size to reduce memory consumption
 
 ---
 
-## 🔜 Future Work
-
-- Multi-class instance segmentation examples
-- Custom annotation via VGG or LabelMe + conversion
-- Combining instance segmentation with classification
 

@@ -31,7 +31,5 @@ wget -q -P tessdata https://github.com/tesseract-ocr/tessdata/raw/main/pol.train
 
 conda run -n "$env_name" pip install matplotlib
 
-echo ""
-echo "✅ Installation complete!"
-echo "In your notebook, add this before using OCR:"
+echo "Environment setup complete: '$env_name'"
 

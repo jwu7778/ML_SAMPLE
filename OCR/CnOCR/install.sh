@@ -62,6 +62,6 @@ eval "$(conda shell.bash hook)"
 conda activate "$env_name"
 python -m ipykernel install --user --name="$env_name" --display-name="Python ($env_name)"
 
-# Step 9: Finish
-echo "CnOCR environment '$env_name' installed and kernel registered successfully."
+echo "Environment setup complete: '$env_name'"
+
 

@@ -24,7 +24,7 @@ conda run -n "$env_name" python -m ipykernel install --user --name="$env_name" -
 echo "Jupyter kernel 'Python ($env_name)' registered."
 
 # Step 3: Upgrade pip and setuptools    
-echo "📦 Upgrading pip, setuptools, ninja..."
+echo "Upgrading pip, setuptools, ninja..."
 conda run -n "$env_name" pip install -U pip setuptools ninja 
 
 # Check if the environment is WSL
@@ -65,7 +65,7 @@ fi
 # Install PyTorch based on GPU vendor
 echo "Installing PyTorch for GPU vendor: $gpu_vendor"
 if [[ $gpu_vendor == "NVIDIA" ]]; then
-    conda run -n "$env_name" pip install torch==2.7.0+cu128 torchvision==0.22.0+cu128 torchaudio==2.7.0+cu128 --index-url https://download.pytorch.org/whl/cu128
+    conda run -n "$env_name" pip install torch==2.7.0+cu128 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
 elif [[ $gpu_vendor == "AMD" ]]; then
     conda run -n "$env_name" pip install torch==2.7.0+rocm6.3 torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.3
 else
@@ -82,7 +82,7 @@ conda run -n "$env_name"  pip install -e .
 cd ..
 
 
-echo "📥 Cloning mmcv..."
+echo "Cloning mmcv..."
 git clone https://github.com/open-mmlab/mmcv.git 
 cd mmcv 
 git checkout v2.2.0 
@@ -91,9 +91,11 @@ cd ..
 
 
 # Step 7: Install additional packages
-echo "📦 Installing additional Python packages..."
+echo "Installing additional Python packages..."
 conda run -n "$env_name" pip install regex==2024.11.6
 conda run -n "$env_name" pip install -U importlib_metadata huggingface_hub future tensorboard ftfy
+conda run -n "$env_name" pip install albumentations==2.0.8
+conda run -n "$env_name" pip install seaborn==0.13.2
 
 
 # Clone the mmsegmentation repository
@@ -118,7 +120,10 @@ cd ..
 
 
 cp checkpoint.py mmengine/mmengine/runner/checkpoint.py
+cp analyze_logs.py mmsegmentation/tools/analysis_tools/analyze_logs.py
+cp local_visualizer.py mmsegmentation/mmseg/visualization/local_visualizer.py
+cp transforms.py mmsegmentation/mmseg/datasets/transforms/transforms.py
+cp __init__transforms.py mmsegmentation/mmseg/datasets/transforms/__init__.py
+cp __init__mmseg.py mmsegmentation/mmseg/datasets/__init__.py
 
-
-
-echo "✅ Environment setup complete: '$env_name'"
+echo "Environment setup complete: '$env_name'"

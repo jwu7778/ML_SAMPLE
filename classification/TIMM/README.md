@@ -6,20 +6,15 @@ This repository contains a modular deep learning pipeline using [PyTorch Image M
 
 ## 🔗 Workflow Overview
 
-1. **`TIMM_Install&Train.ipynb`**
-   - 🔧 **Purpose**: Install dependencies and train a baseline model.
+1. **`TIMM_Tutorial.ipynb`**
+   - 🔧 **Purpose**: This script demonstrates a basic workflow using a simple dataset. You can adapt it to your own dataset and select a model by modifying the script accordingly.
    - 📚 **Dataset**: [Imagenette](https://github.com/fastai/imagenette) — a 10-class subset of ImageNet designed for fast experimentation.
-   - 🏗️ **Example Use Case**: Quick validation of training workflows or model behavior.
+   - 🏗️ **Example Use Case**: Quick start of training workflows or model behavior.
 
 2. **`TIMM_CustomedTrain.ipynb`**
-   - 🔧 **Purpose**: Train a model using a custom dataset.
+   - 🔧 **Purpose**: Example of training a model on a custom dataset, evaluating its performance, and running inference on new data.
    - 📚 **Dataset Example**: [Cassava Leaf Disease](https://www.kaggle.com/competitions/cassava-leaf-disease-classification) — 5-class classification of cassava plant leaf diseases (e.g., blight, mosaic).
    - 🌱 **Example Use Case**: Agricultural disease detection using real-world crop images.
-
-3. **`TIMM_Validate&Inference.ipynb`**
-   - 🔧 **Purpose**: Evaluate the model and run inference on new data.
-   - 📚 **Dataset**: Same as training or unseen test images.
-   - 📈 **Example Use Case**: Batch prediction and performance measurement.
 
 ---
 
@@ -29,15 +24,16 @@ This repository contains a modular deep learning pipeline using [PyTorch Image M
 All datasets should follow the standard folder structure:
 
 ```
-dataset/
-├── train/
-│   ├── class1/
-│   ├── class2/
-│   └── ...
-└── val/
-    ├── class1/
-    ├── class2/
-    └── ...
+├── train
+│   ├── class1
+│   │   ├── image1
+│   │   └── image2
+│   ├── class2
+│   └── class3
+└── val
+    ├── class1
+    ├── class2
+    └── class3
 ```
 
 You can use any dataset with this format. For example:
@@ -51,9 +47,8 @@ You can use any dataset with this format. For example:
 It is recommended to run the notebooks in the following order:
 
 ```text
-1. TIMM_Install&Train.ipynb
+1. TIMM_Tutorial.ipynb
 2. TIMM_CustomedTrain.ipynb
-3. TIMM_Validate&Inference.ipynb
 ```
 
 Each notebook is self-contained and can be run independently if paths are properly set.

@@ -8,13 +8,14 @@ It includes both **single-label classification** and **multi-label classificatio
 
 ## 📘 Available Notebooks
 
-1. **`MMClassification_Tutorial_Resnet.ipynb`**  
-   - Demonstrates training a `resnet50` model for **single-label classification** on a filtered subset of the **Caltech101** dataset.
-   - The task is to distinguish between `"airplanes"` and `"Motorbikes"` classes.
+1. **`MMClassification_Tutorial_SingleLabel.ipynb`**
+   - Introduction to the MMPretrain package.
+   - This script demonstrates a basic workflow using a simple dataset. You can adapt it to your own dataset and select a model by modifying the script accordingly.
+   - Here we demonstrates training a `resnet50` model for **single-label classification** on a subset of the **Caltech101** including airplanes and motorbikes.
 
-2. **`MMClassification_Tutorial_Resnet_MultiLabel.ipynb`**  
-   - Demonstrates **multi-label classification** using the **VOC2007** dataset.
-   - Shows model configuration, training, and evaluation with metrics like mAP and F1-score.
+2. **`MMClassification_Tutorial_Resnet_MultiLabel.ipynb`**
+   - This script demonstrates a basic workflow using a simple dataset for multi-label classification. You can adapt it to your own dataset and select a model by modifying the script accordingly.
+   - Here we demonstrates training a `csra` model for **multi-label classification** using the **VOC2007** dataset.
 
 3. **`MMDeploy_Tutorial.ipynb`**  
    - Converts the trained model into ONNX format using [MMDeploy](https://github.com/open-mmlab/mmdeploy).
@@ -49,23 +50,56 @@ It includes both **single-label classification** and **multi-label classificatio
 - Used as a **single-label classification**.
 - Images are RGB, organized by class folders.
 
+As a single-label dataset, the format should be
+  ```
+    ├── train
+    │   ├── class1
+    │   │   ├── image1
+    │   │   └── image2
+    │   ├── class2
+    │   └── class3
+    └── val
+        ├── class1
+        ├── class2
+        └── class3
+  ```
+  
 - **VOC2007:**  
 - Used for **multi-label classification**.
 - Images can contain multiple objects from 20 categories.
 - Custom dataset preparation script is used to generate multi-label image lists and annotations.
-- **Structure:** 
-  If codes are executed correctly, you should find a folder mmpretrain/data/VOC2007/ having
+
+As a multi-label dataset, the format should be
   ```
-  ├── Annotations/
-  │   ├── 000001.xml
-  │   └── ...
-  ├── ImageSets/
-  │   └── Main
-  │       ├── test.txt
-  │       └── trainval.txt
-  └── JPEGImages/ (syslink)
-      ├── 000001.jpg
-      └── ...
+    ├── train
+    │   ├── image1
+    │   ├── image2
+    │   └── annotation.json
+    └── val
+        ├── image1
+        ├── image2
+        └── annotation.json
+
+    Where the json is like
+    {
+        "metainfo":
+        {
+          "classes":['A', 'B', 'C'....]
+        },
+        "data_list":
+        [
+          {
+            "img_path": "test_img1.jpg",
+            'gt_label': [0, 1],
+          },
+          {
+            "img_path": "test_img2.jpg",
+            'gt_label': [2],
+          },
+        ]
+        ....
+    }
+        
   ```
 
 ---

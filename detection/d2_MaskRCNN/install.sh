@@ -1,53 +1,30 @@
 #!/bin/bash
 
-set -e  # Stop script on error
-start_time=$(date +%s)  # Start timing
-
 env_name=$1
-
-# Color codes
-RED="\033[0;31m"
-GREEN="\033[0;32m"
-BLUE="\033[1;34m"
-NC="\033[0m" # No color
-
-# Validate argument
 if [ -z "$env_name" ]; then
-  echo -e "${RED}[Error]${NC} Please provide an environment name. Example: sh install_detectron2.sh myenv"
+  echo "Please provide an environment name. Example: sh install.sh myenv"
   exit 1
 fi
 
-# Check if conda is available
-if ! command -v conda &> /dev/null; then
-  echo -e "${RED}[Error]${NC} Conda not found. Please install Miniconda/Anaconda first."
-  exit 1
+source /opt/miniconda3/etc/profile.d/conda.sh
+
+if [[ "$CONDA_DEFAULT_ENV" != "" && "$CONDA_DEFAULT_ENV" != "base" ]]; then
+  echo "Not in base environment. Deactivating '$CONDA_DEFAULT_ENV'..."
+  conda deactivate
 fi
+
+# Step 1: Create the conda environment
+conda create --name "$env_name" python=3.10 -y
+echo "Environment '$env_name' created."
 
 # Get the script's current directory and switch to it
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "$SCRIPT_DIR"
 
-# Initialize conda
-source "$(conda info --base)/etc/profile.d/conda.sh"
-
-# Deactivate current env if not base
-if [[ "$CONDA_DEFAULT_ENV" != "" && "$CONDA_DEFAULT_ENV" != "base" ]]; then
-  echo "Deactivating current environment '$CONDA_DEFAULT_ENV'..."
-  conda deactivate
-fi
-
-# Create conda environment if it doesn't exist
-if ! conda info --envs | grep -q "^$env_name"; then
-  echo -e "${BLUE}Creating environment '$env_name' with Python 3.10...${NC}"
-  conda create --name "$env_name" python=3.10 -y
-else
-  echo -e "${BLUE}Environment '$env_name' already exists. Skipping creation.${NC}"
-  conda activate "$env_name"
-fi
-
-# Install Jupyter and register the kernel
+# Step 3: Install Jupyter and register the kernel
 conda run -n "$env_name" pip install jupyter ipykernel
 conda run -n "$env_name" python -m ipykernel install --user --name="$env_name" --display-name="Python ($env_name)"
+echo "Jupyter kernel 'Python ($env_name)' registered."
 
 # Check if the environment is WSL
 if grep -qi microsoft /proc/version || uname -r | grep -qi microsoft; then
@@ -87,7 +64,7 @@ fi
 # Install PyTorch based on GPU vendor
 echo "Installing PyTorch for GPU vendor: $gpu_vendor"
 if [[ $gpu_vendor == "NVIDIA" ]]; then
-    conda run -n "$env_name" pip install torch==2.7.0+cu128 torchvision==0.22.0+cu128 torchaudio==2.7.0+cu128 --index-url https://download.pytorch.org/whl/cu128
+    conda run -n "$env_name" pip install torch==2.7.0+cu128 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
 elif [[ $gpu_vendor == "AMD" ]]; then
     conda run -n "$env_name" pip install torch==2.7.0+rocm6.3 torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.3
 else
@@ -109,24 +86,18 @@ conda run -n "$env_name" pip install --no-build-isolation "detectron2 @ file://$
 conda run -n "$env_name" pip install opencv-python fvcore cloudpickle
 conda run -n "$env_name" pip install scikit-learn==1.6.1
 conda run -n "$env_name" pip install seaborn==0.13.2
+conda run -n "$env_name" pip install albumentations==2.0.8
 
 # Install onnx to export your model
 conda run -n "$env_name" pip install onnx onnxruntime-gpu
 
+conda run -n "$env_name" pip install fiftyone
 
-wget https://github.com/matterport/Mask_RCNN/releases/download/v2.1/balloon_dataset.zip
-unzip balloon_dataset.zip -d ./dataset/
+unzip balloon.zip -d ./detectron2/dataset/
 
 # Revise error code in demo.py and postprocessing.py
 cp -fv ./demo.py detectron2/demo/demo.py
 cp -fv ./mask_ops.py detectron2/detectron2/layers/mask_ops.py
+cp -fv ./dataset_mapper.py detectron2/detectron2/data/dataset_mapper.py
 
-
-# Done
-end_time=$(date +%s)
-elapsed=$((end_time - start_time))
-minutes=$((elapsed / 60))
-seconds=$((elapsed % 60))
-
-echo -e "${GREEN}[Success]${NC} Detectron2 environment '$env_name' installed with Jupyter kernel registered."
-echo -e "${BLUE}[Info]${NC} Total installation time: ${minutes} min ${seconds} sec"
+echo "Environment setup complete: '$env_name'"

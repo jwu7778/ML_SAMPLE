@@ -8,7 +8,7 @@ It uses a **semantic segmentation** setup on outdoor scene images, followed by a
 
 ## 📘 Available Notebooks
 
-1. **`MMSegmentation_Tutorial_PSPNet.ipynb`**  
+1. **`MMSegmentation_Tutorial.ipynb`**  
    - Demonstrates training a `PSPNet` model for **semantic segmentation** on the **Stanford Background** dataset.
    - Includes model configuration, dataset registration, training loop, and evaluation metrics.
 
@@ -16,35 +16,14 @@ It uses a **semantic segmentation** setup on outdoor scene images, followed by a
    - Converts the trained model into ONNX format using [MMDeploy](https://github.com/open-mmlab/mmdeploy).
    - Provides detailed steps on preparing the deployment config and performing inference with backend engines.
 
-> 📝 Please run the training notebook first to obtain the model checkpoint before executing the deployment notebook.
+> 📝 Please run the notebooks in order to obtain the model checkpoint before executing the deployment notebook.
 
 ---
-
-## 📂 Dataset Setup
-
-- **Source:** [http://dags.stanford.edu/data/iccv09Data.tar.gz -O stanford_background.tar.gz]
-- **Directory Placement:**  
-  - Our script should have automatically downloaded the dataset and saved at mmsegmentation as 'iccv09Data'
-  - If you cannot find it, download from the above link or unzip the attached 'iccv09Data.zip'
-  - Unzip the file
-  - Put folder 'iccv09Data' under folder 'mmsegmentation'
-
-```
-mmsegmentation/
-└── iccv09Data/
-    ├── images/
-    ├── labels/
-    └── splits/
-```
-
-> 💡 This folder structure is required for the current tutorial to properly organize the dataset for training and evaluation.
-
----
-
 ## 🧾 Dataset Description
 
-- **Stanford Background Dataset**  
-- The dataset contains 715 RGB images and the corresponding label images. Images are approximately 240×320 pixels in size and pixels are classified into eight different categories 
+- **Stanford Background Dataset**
+- **Source:** [http://dags.stanford.edu/data/iccv09Data.tar.gz -O stanford_background.tar.gz]
+- **About:** The dataset contains 715 RGB images and the corresponding label images of outdoor scenes. Images are approximately 240×320 pixels in size and pixels are classified into eight different categories 
   - sky
   - tree
   - road
@@ -53,10 +32,21 @@ mmsegmentation/
   - building
   - mountain
   - foreground object
-
+- **Structure:** 
+```
+├── train
+│   ├── image1
+│   ├── image1.json
+│   ├── image2
+│   └── image2.json
+└── val
+    ├── image1
+    ├── image1.json
+    ├── image2
+    └── image2.json
+```
 
 ---
-
 ## 🛠 Configuration Notes
 
 - **Backbone:** `pspnet`  

@@ -24,7 +24,7 @@ conda run -n "$env_name" python -m ipykernel install --user --name="$env_name" -
 echo "Jupyter kernel 'Python ($env_name)' registered."
 
 # Step 3: Upgrade pip and setuptools    
-echo "📦 Upgrading pip, setuptools, ninja..."
+echo "Upgrading pip, setuptools, ninja..."
 conda run -n "$env_name" pip install -U pip setuptools ninja 
 
 # Check if the environment is WSL
@@ -65,7 +65,7 @@ fi
 # Install PyTorch based on GPU vendor
 echo "Installing PyTorch for GPU vendor: $gpu_vendor"
 if [[ $gpu_vendor == "NVIDIA" ]]; then
-    conda run -n "$env_name" pip install torch==2.7.0+cu128 torchvision==0.22.0+cu128 torchaudio==2.7.0+cu128 --index-url https://download.pytorch.org/whl/cu128
+    conda run -n "$env_name" pip install torch==2.7.0+cu128 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
 elif [[ $gpu_vendor == "AMD" ]]; then
     conda run -n "$env_name" pip install torch==2.7.0+rocm6.3 torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.3
 else
@@ -75,7 +75,7 @@ fi
 
 
 # Step 5: Other dependencies
-echo "🔧 Installing additional dependencies..."
+echo "Installing additional dependencies..."
 conda run -n "$env_name" pip install opencv-python==4.11.0.86 
 conda run -n "$env_name" pip install -U openmim 
 conda run -n "$env_name" pip install requests==2.31 
@@ -84,7 +84,7 @@ conda run -n "$env_name" pip install scikit-learn==1.6.1
 conda run -n "$env_name" pip install seaborn==0.13.2
 
 # Step 6: Clone and install mmcv
-echo "📥 Cloning mmcv..."
+echo "Cloning mmcv..."
 git clone https://github.com/open-mmlab/mmcv.git 
 cd mmcv 
 git checkout v2.1.0 
@@ -111,7 +111,10 @@ cd ..
 
 mkdir mmpretrain/data
 
-conda run -n "$env_name" pip install onnxruntime-gpu
 cp checkpoint.py mmengine/mmengine/runner/checkpoint.py
+cp analyze_logs.py mmpretrain/tools/analysis_tools/analyze_logs.py
+cp photometric.py mmcv/mmcv/image/photometric.py
 
-echo "✅ Environment '$env_name' setup complete!"
+conda run -n "$env_name" pip install onnxruntime-gpu
+
+echo "Environment '$env_name' setup complete!"

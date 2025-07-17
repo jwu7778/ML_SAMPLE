@@ -2,23 +2,22 @@
 
 This repository provides a practical walkthrough for implementing **Faster R-CNN**-based object detection pipelines using [Detectron2](https://github.com/facebookresearch/detectron2), an open-source library developed by Facebook AI Research (FAIR).
 
-The tutorial series focuses on bounding-box object detection using custom datasets. It includes **multi-class detection** (e.g., chess pieces), as well as how to run inference using pretrained models.
+The tutorial series focuses on bounding-box object detection using custom datasets. 
 
 ---
 
 ## 📘 Available Notebooks
 
-1. **`Detectron2_Set_up_and_Train_Detection_(Tortoise_and_Lizard).ipynb`**  
-   - Task: Multi-class detection  
-   - Dataset: Two animal classes – tortoise and lizard  
-   - Format: Annotated via **VGG Image Annotator (VIA)** and converted to Detectron2 JSON  
-   - Workflow: Data registration → Config setup → Model training → Result visualization
+1. **`Detectron2_Detection_Tutorial.ipynb`**  
+   - Introduction of Detectron2 package. Demonstration of workflow with a simple dataset. You can fit your dataset and choose your model by revising this script.  
+   - Dataset: Two animal classes from OpenImagesv7 – tortoise and lizard
+   - Format: Pascal VOC dataset
 
-2. **`Detectron2_Train_Detection_of_Multiclasses_(Chess).ipynb`**  
-   - Task: Multi-class object detection  
-   - Dataset: Chess pieces (king, queen, bishop, knight, rook, pawn)  
-   - Format: COCO-style JSON format  
-   - Highlights: Class-balanced setup, config adjustment for multi-class support
+2. **`Detectron2_Train_Detection_of_Chess.ipynb`**  
+   - Example of training a model on a custom dataset, evaluating its performance, and running inference on new data.
+   - Dataset: Chess pieces (king, queen, bishop, knight, rook, pawn) in black or white 
+   - Format: Pascal VOC dataset
+   - Highlights: Make train&test split, config adjustments for custom dataset and model
 
 3. **`Inference PreTrained Detection.ipynb`**  
    - Task: Inference using pretrained Faster R-CNN models  
@@ -32,28 +31,42 @@ The tutorial series focuses on bounding-box object detection using custom datase
 ### 🐢 Tortoise & Lizard
 
 - **Source:** Custom annotated images, which is a subset of [Open Images v7](https://storage.googleapis.com/openimages/web/download_v7.html)
-- **Tool:** [VGG Image Annotator (VIA)](http://www.robots.ox.ac.uk/~vgg/software/via/)
-- **Annotation Format:** VIA JSON converted to Detectron2-compatible format
-- **Image Characteristics:** Natural outdoor scenes with two animal species  
+- **Annotation Format:** unique format, but we have converted it to Pascal VOC when you run the download script
 - **Classes:** 
   - `tortoise`  
   - `lizard`  
-- **Challenges:** Varying lighting conditions and overlapping species
+- **Challenges:** Varying lighting conditions and overlapping
+- **Directory Structure:**
+  ```
+    ├── train
+    │   ├── image1
+    │   ├── image1.xml
+    │   ├── image2
+    │   └── image2.xml
+    └── validation
+        ├── image1
+        ├── image1.xml
+        ├── image2
+        └── image2.xml
+  ```
 
 ### ♟️ Chess Pieces
 
 - **Source:** Manually collected chessboard images by [Gilbert Tanner](https://www.kaggle.com/datasets/tannergi/chess-piece-detection)
-- **Annotation Format:** COCO JSON  
+- **Annotation Format:** Pascal VOC 
 - **Directory Structure:**
   ```
-  ├── images/
-  │   ├── chess_001.jpg
-  │   └── ...
-  └── annotations/
-      └── instances_chess.json
+    Chess Detection
+    ├── annotations
+    │   ├── IMG_1989.xml
+    │   ├── IMG_1990.xml
+    │   ├── ...
+    ├── images
+    │   ├── IMG_1989.JPG
+    │   ├── IMG_1990.JPG
   ```
 - **Classes:** 
-  - `king`, `queen`, `bishop`, `knight`, `rook`, `pawn`  
+  - `king`, `queen`, `bishop`, `knight`, `rook`, `pawn` in black or white  
 - **Considerations:** Small object sizes, class imbalance
 
 ---

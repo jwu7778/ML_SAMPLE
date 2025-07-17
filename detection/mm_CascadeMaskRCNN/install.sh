@@ -66,7 +66,7 @@ fi
 # Install PyTorch based on GPU vendor
 echo "Installing PyTorch for GPU vendor: $gpu_vendor"
 if [[ $gpu_vendor == "NVIDIA" ]]; then
-    conda run -n "$env_name" pip install torch==2.7.0+cu128 torchvision==0.22.0+cu128 torchaudio==2.7.0+cu128 --index-url https://download.pytorch.org/whl/cu128
+    conda run -n "$env_name" pip install torch==2.7.0+cu128 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
 elif [[ $gpu_vendor == "AMD" ]]; then
     conda run -n "$env_name" pip install torch==2.7.0+rocm6.3 torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.3
 else
@@ -83,7 +83,7 @@ conda run -n "$env_name"  pip install -e .
 cd ..
 
 
-echo "📥 Cloning mmcv..."
+echo "Cloning mmcv..."
 git clone https://github.com/open-mmlab/mmcv.git 
 cd mmcv 
 git checkout v2.2.0 
@@ -92,19 +92,12 @@ cd ..
 
 
 # Step 7: Install additional packages
-echo "📦 Installing additional Python packages..."
+echo "Installing additional Python packages..."
 conda run -n "$env_name" pip install regex==2024.11.6
 conda run -n "$env_name" pip install -U importlib_metadata huggingface_hub future tensorboard ftfy
-
-
-# Clone the mmsegmentation repository
-git clone https://github.com/open-mmlab/mmsegmentation.git
-cd mmsegmentation
-git checkout v1.2.2
-# Modify mmcv_maximum_version in mmseg/__init__.py (Ubuntu version)
-sed -i "s/^MMCV_MAX *= *.*/MMCV_MAX = '2.2.1'/" mmseg/__init__.py
-conda run -n "$env_name"  pip install -e .
-cd ..
+conda run -n "$env_name" pip install scikit-learn==1.6.1
+conda run -n "$env_name" pip install seaborn==0.13.2
+conda run -n "$env_name" pip install albumentations==2.0.8
 
 
 # Clone the mmdetection repository
@@ -117,8 +110,6 @@ conda run -n "$env_name"  pip install -e .
 # Go back to the original directory if needed
 cd ..
 
-cp checkpoint.py mmengine/mmengine/runner/checkpoint.py
-
 git clone -b main https://github.com/open-mmlab/mmdeploy.git
 cd mmdeploy
 git checkout v1.3.1
@@ -128,9 +119,12 @@ cd ..
 
 conda run -n "$env_name" pip install onnxruntime-gpu
 
-wget https://github.com/matterport/Mask_RCNN/releases/download/v2.1/balloon_dataset.zip
-unzip balloon_dataset.zip -d mmdetection/data
+
+unzip balloon.zip -d mmdetection/data
+cp checkpoint.py mmengine/mmengine/runner/checkpoint.py
+cp analyze_logs.py mmdetection/tools/analysis_tools/analyze_logs.py
 
 conda run -n "$env_name" pip install pycocotools==2.0.8
- 
-echo "✅ Environment setup complete: '$env_name'"
+
+
+echo "Environment setup complete: '$env_name'"

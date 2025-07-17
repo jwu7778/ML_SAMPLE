@@ -8,43 +8,59 @@ It is suitable for real-time and edge-device applications, and provides a comple
 
 ## 📘 Available Notebooks
 
-1. **`MMDet_Detection_Tutorial_RtmDet.ipynb`**  
-   - Demonstrates training the `rtmdet_tiny_8xb32-300e_coco` model from [MMDetection](https://github.com/open-mmlab/mmdetection).
-   - Uses the **Balloon dataset** for object detection.
-   - Covers:
-     - Dataset formatting (COCO-style JSON)
-     - Model config customization
-     - Training and visualization
+1. **`MMDet_Tutorial_Detection.ipynb`**
+   - Introduction of MMDetection package. Demonstration of workflow with a simple dataset. You can fit your dataset and choose your model by revising this script.  
+   - Task: Object detection on a custom dataset  
+   - Dataset: subset of **OpenImagesv7** , including tortoise and lizard
+   - Format: Pascal VOC dataset
 
-2. **`MMDeploy_Tutorial.ipynb`**  
+2. **`MMDet_Tutorial_Detection_balloon_dataset.ipynb`**
+   - Example of training a model on a custom dataset, evaluating its performance, and running inference on new data.
+   - Dataset: Balloon
+   - Format: VGG Json
+   - Highlights: Config adjustments for custom dataset
+       
+3. **`MMDeploy_Tutorial.ipynb`**
+   - For the Tortoise & Lizard dataset
    - Shows how to deploy the trained RTMDet model using [MMDeploy](https://github.com/open-mmlab/mmdeploy).
    - Covers:
      - Environment setup
      - Conversion to ONNX or other formats
      - Backend inference (e.g., ONNXRuntime, TensorRT)
 
+4. **`MMDeploy_Tutorial_balloon_dataset.ipynb`**
+   - Same as 3, but for balloon dataset
+
 > 📝 Train the model first and save a checkpoint file before running deployment steps.
 
 ---
+### 🐢 Dataset: Tortoise & Lizard
 
-## 📂 Dataset Setup: Balloon
+- **Source:** Custom annotated images, which is a subset of [Open Images v7](https://storage.googleapis.com/openimages/web/download_v7.html)
+- **Annotation Format:** unique format, but we have converted it to Pascal VOC when you run the download script
+- **Classes:** 
+  - `tortoise`  
+  - `lizard`  
+- **Directory Structure:**
+  ```
+    ├── train
+    │   ├── image1
+    │   ├── image1.xml
+    │   ├── image2
+    │   └── image2.xml
+    └── validation
+        ├── image1
+        ├── image1.xml
+        ├── image2
+        └── image2.xml
+  ```
 
+## 🧾 Dataset: Balloon
 - **Source:** [https://github.com/matterport/Mask_RCNN/tree/master/samples/balloon](https://github.com/matterport/Mask_RCNN/tree/master/samples/balloon)
-- **Steps to prepare:**
-  1. Download and unzip the dataset.
-  2. Convert annotations to COCO format if not already.
-  3. Place the dataset under `mmdetection/data/balloon`.
-
-> ✅ For this tutorial, the dataset has already been prepared and placed under `mmdetection/data/balloon`.
-
----
-
-## 🧾 Dataset Description: Balloon
-
 - **Target:** Object detection of balloons in photographs.
 - **Classes:**  
   - `balloon`
-- **Type:** RGB images with polygon annotations converted to bounding boxes
+- **Type:** RGB images with polygon annotations converted to bounding boxes as VGG Json
 
 ---
 

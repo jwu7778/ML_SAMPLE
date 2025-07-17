@@ -55,13 +55,12 @@ fi
 # Install PyTorch based on GPU vendor
 echo "Installing PyTorch for GPU vendor: $gpu_vendor"
 if [[ $gpu_vendor == "NVIDIA" ]]; then
-    conda run -n "$env_name" pip install torch==2.7.0+cu128 torchvision==0.22.0+cu128 torchaudio==2.7.0+cu128 --index-url https://download.pytorch.org/whl/cu128
+    conda run -n "$env_name" pip install torch==2.7.0+cu128 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
 elif [[ $gpu_vendor == "AMD" ]]; then
     conda run -n "$env_name" pip install torch==2.7.0+rocm6.3 torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.3
 else
     conda run -n "$env_name" pip install torch torchvision torchaudio
 fi
-
 
 
 # Step 3: Install Jupyter and register the kernel
@@ -92,9 +91,11 @@ conda run -n "$env_name" pip install matplotlib==3.9.4
 conda run -n "$env_name" pip install pandas
 conda run -n "$env_name" pip install scikit-learn==1.6.1
 conda run -n "$env_name" pip install seaborn==0.13.2
+conda run -n "$env_name" pip install albumentations==2.0.8
 conda run -n "$env_name" pip install onnx
 conda run -n "$env_name" pip install onnxruntime-gpu
 conda run -n "$env_name" pip install opencv-python
+conda run -n "$env_name" pip install requests
 echo "Additional packages installed."
 
 # Step 7: Download datasets to ./dataset/
@@ -128,7 +129,8 @@ cd ..
 
 # Revise error code in onnx.py
 cp -fv ./onnx.py pytorch-image-models/timm/utils/onnx.py
+cp -fv ./dataset.py pytorch-image-models/timm/data/dataset.py
+cp -fv ./train.py pytorch-image-models/train.py
+cp -fv ./transforms_factory.py pytorch-image-models/timm/data/transforms_factory.py
 
-# Final output: Echo kernel path for programmatic parsing
-echo "KERNEL_PATH=$HOME/.local/share/jupyter/kernels/$env_name"
-
+echo "Environment setup complete: '$env_name'"

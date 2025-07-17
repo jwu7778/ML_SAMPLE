@@ -4,15 +4,15 @@ This repository provides a complete workflow for training instance segmentation 
 
 This version demonstrates the pipeline using the **Mask R-CNN** architecture and the **Balloon** dataset.
 
-The framework is modular and easily extendable to other architectures (e.g., **Cascade Mask R-CNN**, **YOLO** variants) and datasets (e.g., **COCO**, **VOC**).
+The framework is modular and easily extendable to other architectures (e.g., **Cascade Mask R-CNN**, **YOLO** variants) and datasets (e.g., **COCO**).
 
 ---
 
 ## 📘 Available Notebooks
 
-1. **`MMDet_InstanceSeg_Tutorial.ipynb`**  
-   - Demonstrates training a `mask_rcnn_r50_fpn_1x_coco` model using [MMDetection](https://github.com/open-mmlab/mmdetection).
-   - Uses the [Balloon dataset](https://github.com/matterport/Mask_RCNN/tree/master/samples/balloon).
+1. **`MMDet_Tutorial_Instance_Segmentation.ipynb`**
+   - Introduction of MMDetection package. Demonstration of workflow with a simple dataset. You can fit your dataset and choose your model by revising this script.  
+   - Demonstrates training a `mask_rcnn_r50_fpn_1x_coco` model on a balloon dataset.
    - Includes steps for dataset conversion (to COCO format), config file editing, model training, and visualization of predictions.
 
 2. **`MMDeploy_Tutorial.ipynb`**  
@@ -23,25 +23,23 @@ The framework is modular and easily extendable to other architectures (e.g., **C
 
 ---
 
-## 📂 Dataset Setup: Balloon
-
-- **Source:** [https://github.com/matterport/Mask_RCNN/tree/master/samples/balloon](https://github.com/matterport/Mask_RCNN/tree/master/samples/balloon)
-- **Steps to prepare:**
-  1. Download the Balloon dataset JSON annotations and images.
-  2. Convert the annotations to COCO format (a helper function is provided in the notebook).
-  3. Place the converted dataset under `mmdetection/data/balloon/`.
-
-> 🔧 These preparation steps are included in the training notebook.  
-> You may adapt the conversion function for other custom datasets.
-
----
-
-## 🧾 Dataset Description: Balloon
-
-- **Target:** The Balloon dataset is a small dataset designed to test instance segmentation pipelines. Each image contains one or more balloons with polygon-style instance annotations.
-- **Structure:** JSON annotations + image files
-- **Data Type:** RGB images
-- **Classes:** Single-class (balloon)
+## 🎈 Dataset Description: Balloon
+- **Source:** [Matterport Balloon Dataset](https://github.com/matterport/Mask_RCNN/tree/master/samples/balloon) provided by Waleed Abdulla
+- **Target:** Simple but effective dataset to demonstrate instance segmentation tasks with non-rectangular objects. Each image contains one or more balloons with polygon-style instance annotations.
+- **Format:**  LabelMe JSON  
+- **Structure:** 
+  ```
+    ├── train
+    │   ├── image1
+    │   ├── image1.json
+    │   ├── image2
+    │   └── image2.json
+    └── val
+        ├── image1
+        ├── image1.json
+        ├── image2
+        └── image2.json
+  ```
 
 ---
 
